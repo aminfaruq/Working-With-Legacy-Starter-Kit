@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		83C2E59A3099AC19008D3591 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 83C2E5993099AC19008D3591 /* RxSwift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		83C2E5603099A8A3008D3591 /* QuotesAppLegacy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuotesAppLegacy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -40,7 +36,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83C2E59A3099AC19008D3591 /* RxSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,7 +78,6 @@
 			);
 			name = QuotesAppLegacy;
 			packageProductDependencies = (
-				83C2E5993099AC19008D3591 /* RxSwift */,
 			);
 			productName = QuotesAppLegacy;
 			productReference = 83C2E5603099A8A3008D3591 /* QuotesAppLegacy.app */;
@@ -114,7 +108,6 @@
 			mainGroup = 83C2E5573099A8A3008D3591;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				83C2E5983099AC19008D3591 /* XCRemoteSwiftPackageReference "RxSwift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 83C2E5613099A8A3008D3591 /* Products */;
@@ -350,25 +343,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		83C2E5983099AC19008D3591 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 6.10.2;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		83C2E5993099AC19008D3591 /* RxSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 83C2E5983099AC19008D3591 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxSwift;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83C2E5583099A8A3008D3591 /* Project object */;
 }
