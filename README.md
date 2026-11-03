@@ -6,7 +6,7 @@ The goal of this repository is to practice **working inside an existing legacy c
 
 ---
 
-##  Background & Existing Codebase
+## Background & Existing Codebase
 
 This project simulates a typical rushed MVP / office legacy iOS project that you often inherit in the real world. Currently, the app has a 2-tab `MainTabBarController`:
 
@@ -23,9 +23,9 @@ The existing **Quotes** feature was deliberately written with the following clas
    - `QuotesViewController` handles UI creation, layout, `UITableViewDataSource`, `UITableViewDelegate`, loading/error state management, presentation string formatting, and network calls all in one file.
 2. **Monolithic Singleton `APIManager`**:
    - Uses a global concrete singleton (`APIManager.shared`) with `private init()`.
-   - Although it looks "reusable" on the surface with generic `get<T: Decodable>` and `post<T: Decodable>` helpers, it has **no protocols, no abstractions, and no Dependency Injection (DI)**.
-   - Directly calls `URLSession.shared.dataTask` with a hardcoded `baseURL`, making it impossible to mock or unit test without hitting the live internet.
-   - Feature-specific endpoints (`fetchQuotes`) are accumulated directly inside `APIManager`.
+   - Represents an enterprise-grade God-Class that dictates all network traffic, custom headers (`X-Platform`, `X-App-Version`, `Authorization`), and logging.
+   - Has **no protocols, no abstractions, and no Dependency Injection (DI)**.
+   - Feature-specific endpoints (`fetchQuotes`) are accumulated via extensions (`APIManager+Quotes.swift`).
 3. **No Separation of Concerns**:
    - `QuotesViewController` directly calls `APIManager.shared.fetchQuotes(...)` inside `viewDidLoad`.
    - Raw network DTOs (`[QuoteResponse]`) are stored directly as view controller state and formatted inline inside `cellForRowAt`.
@@ -34,7 +34,7 @@ The existing **Quotes** feature was deliberately written with the following clas
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```text
 QuotesAppLegacy/
@@ -43,7 +43,8 @@ QuotesAppLegacy/
 │   ├── SceneDelegate.swift
 │   └── MainTabBarController.swift     # Root 2-tab bar controller (Quotes & User)
 ├── Networking/
-│   └── APIManager.swift               # Legacy singleton networking manager
+│   ├── APIManager.swift               # Core legacy singleton networking manager (DO NOT MODIFY)
+│   └── APIManager+Quotes.swift        # Legacy feature extension for /quotes
 ├── Models/
 │   └── QuoteResponse.swift            # Raw network DTOs for /quotes
 ├── Controllers/
@@ -56,7 +57,7 @@ QuotesAppLegacy/
 
 ---
 
-##  The Challenge: Build the `User List` Feature Cleanly
+## The Challenge: Build the `User List` Feature Cleanly
 
 Your mission is to implement the **User List** feature inside the **User** tab using the DummyJSON Users API:
 
@@ -64,25 +65,40 @@ Your mission is to implement the **User List** feature inside the **User** tab u
 GET https://dummyjson.com/users
 ```
 
-### Challenge Requirements
+### Strict Rules & Challenge Constraints
 
-1. **Do Not Break Existing Functionality**:
-   - The **Quotes** tab (`QuotesViewController`) must continue to work as expected.
-2. **Apply Clean Code & Clean Architecture**:
-   - Decouple the new **User List** feature from concrete implementations using protocols/interfaces and Dependency Injection.
-   - Separate Domain models, Networking/Repository abstractions, Presentation logic (e.g., MVVM / MVP / VIP), and UIKit views.
-   - Compose dependencies cleanly (e.g., in the Composition Root / `MainTabBarController` or a Factory/Coordinator) rather than calling `APIManager.shared` directly inside `UserViewController`.
-3. **Bridge or Abstract Legacy Networking Safely**:
-   - You may either introduce a clean `HTTPClient` abstraction or wrap/adapt `APIManager` behind a protocol (Adapter Pattern) so that your new `User` feature remains 100% testable and decoupled from `APIManager.shared`.
-4. **Practice Test-Driven Development (TDD)**:
-   - Write unit tests first (Red → Green → Refactor) for your new `User` feature components (Use Cases / Service / ViewModel / Presenter / Mapper).
-   - Ensure all tests run fast, deterministically, and completely offline using mocks/stubs/spies—never hitting the live network in unit tests.
+1. **Strictly DO NOT TOUCH or Modify `APIManager.swift`:**
+   - In real-world enterprise environments, company compliance mandates that all HTTP traffic must route through the existing `APIManager.shared` pipeline.
+   - **Do not modify `APIManager.swift`**, do not rewrite it, and **do not create a parallel `URLSession` / Alamofire network engine**.
+   - You must bridge this legacy engine into your clean world using the **Adapter Pattern** (Anti-Corruption Layer).
+2. **Zero Breaking Changes / Regression:**
+   - The **Quotes** tab (`QuotesViewController`) must remain 100% operational as-is.
+3. **Apply Clean Code & Clean Architecture:**
+   - Decouple your new **User List** feature from concrete classes using abstractions/protocols (e.g., `HTTPClient`, `UserListLoader`).
+   - Separate Domain Models, API Loaders/Mappers, Presentation Logic (MVP, MVVM, or VIPER), and UIKit Views.
+   - Compose dependencies cleanly in the Composition Root (`MainTabBarController` or Router/Coordinator) rather than accessing `APIManager.shared` directly inside UI components.
+4. **Practice Pure Test-Driven Development (TDD):**
+   - Write unit tests first (**Red → Green → Refactor**) for your new User feature components (Loaders, Mappers, Presenters/ViewModels).
+   - Ensure all tests run fast, deterministically, and completely offline using test doubles (Spies/Mocks/Stubs)—never hitting the live internet in unit tests.
 
 ---
 
-##  Getting Started
+## Recommended Asynchronous Patterns
+
+To handle asynchronous data streams and bridge callbacks into modern, reactive, or declarative architectures, you are strongly encouraged to choose one of the following paradigms:
+
+* **Swift Concurrency (`async/await`)**:
+  - Bridge `APIManager.get` completion handlers into `async/await` using `withCheckedThrowingContinuation`.
+* **Combine**:
+  - Wrap network operations into `Future` or `AnyPublisher` for a clean functional-reactive pipeline.
+* **RxSwift**:
+  - Wrap network operations into `Single<(Data, HTTPURLResponse)>` or `Observable` to build reactive state-driven presentation layers.
+
+---
+
+## Getting Started
 
 1. Open `QuotesAppLegacy.xcodeproj` in Xcode.
 2. Build and run (`Cmd + R`) on an iOS Simulator.
 3. Verify that the **Quotes** tab loads quotes from `https://dummyjson.com/quotes`.
-4. Switch to the **User** tab (`UserViewController`) and start building the **User List** feature with **TDD & Clean Architecture**!
+4. Switch to the **User** tab (`UserViewController`), create your `HTTPClient` protocol and `APIManagerAdapter`, and start building the **User List** feature with **TDD & Clean Architecture**!
